@@ -30,6 +30,11 @@
   #sidebar .head{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
   #sidebar .head h1{margin:0;font-family:var(--serif);font-size:18px;line-height:1.25}
   #sidebar .head .author{color:var(--muted);font-size:13px;margin-top:4px}
+  #sidebar .head .controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
+  #sidebar .head .settings{display:flex;gap:6px}
+  #menuBtn{font-size:17px;line-height:1;padding:6px 12px}
+  #backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:4}
+  #backdrop.show{display:block}
   #toc{list-style:none;margin:0;padding:8px;overflow:auto;flex:1}
   #toc li{padding:10px 12px;border-radius:8px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
   #toc li:hover{background:rgba(138,90,43,.10)}
@@ -41,8 +46,8 @@
   #main{flex:1;display:flex;flex-direction:column;height:100vh;min-width:0}
   #bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
   #bar .spacer{flex:1}
-  #search{flex:0 1 260px;padding:7px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
-          color:var(--ink);font-size:13px;font-family:var(--sans)}
+  #search{flex:1;min-width:0;max-width:520px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
+          color:var(--ink);font-size:14px;font-family:var(--sans)}
   .seg{display:inline-flex;gap:7px}
   .seg button{border:1px solid var(--line);background:var(--bg);border-radius:5px;padding:2px;cursor:pointer;
               line-height:0;opacity:.4;transition:opacity .15s,box-shadow .15s,border-color .15s}
@@ -97,9 +102,11 @@
     <div class="head">
       <h1 id="bookTitle"></h1>
       <div class="author" id="bookAuthor"></div>
+      <div class="controls" id="controls"></div>
     </div>
     <ul id="toc"></ul>
   </aside>
+  <div id="backdrop"></div>
   <div id="main">
     <div id="bar">
       <button class="btn" id="menuBtn" title="≡">☰</button>
@@ -141,7 +148,6 @@
         </button>
       </span>
       <input id="search" type="search" autocomplete="off">
-      <span class="spacer"></span>
       <button class="btn" id="bmBtn" title="Bookmark this line / Закладка">🔖</button>
       <button class="btn" id="fsDown" title="A−">A−</button>
       <button class="btn" id="fsUp" title="A+">A+</button>
@@ -234,7 +240,7 @@ function load(id){
   const saved = pos[id];
   render(saved!=null ? {toBlock:saved, flash:true} : {});
   if(saved!=null) toast(UI[lang].resume);
-  $("#sidebar").classList.remove("open");
+  closeDrawer();
 }
 
 function setLang(l){
@@ -325,13 +331,28 @@ applyTheme(LS.get("ljd_theme")||(matchMedia("(prefers-color-scheme:dark)").match
 // language buttons
 [...$("#langSeg").children].forEach(b=>b.onclick=()=>setLang(+b.dataset.l));
 
-// menu + keyboard
-$("#menuBtn").onclick=()=>$("#sidebar").classList.toggle("open");
+// slide-in drawer (mobile) with backdrop
+function toggleDrawer(force){
+  const open = force!==undefined ? force : !$("#sidebar").classList.contains("open");
+  $("#sidebar").classList.toggle("open", open);
+  $("#backdrop").classList.toggle("show", open);
+}
+function closeDrawer(){ toggleDrawer(false); }
+$("#menuBtn").onclick=()=>toggleDrawer();
+$("#backdrop").onclick=()=>toggleDrawer(false);
 addEventListener("keydown",e=>{
   if(e.target===search) return;
   if(e.key==="ArrowRight"&&current<PLAYS.length) load(current+1);
   if(e.key==="ArrowLeft"&&current>1) load(current-1);
 });
+
+// move language flags + font/theme controls into the slide-in panel so the top bar always fits
+(function(){
+  const ctrls=$("#controls");
+  const settings=document.createElement("div"); settings.className="settings";
+  settings.append($("#fsDown"),$("#fsUp"),$("#theme"));
+  ctrls.append($("#langSeg"), settings);
+})();
 
 // init — apply language chrome, then resume the last play at the last line
 buildTOC();
