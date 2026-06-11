@@ -32,7 +32,9 @@
   #sidebar .head .author{color:var(--muted);font-size:13px;margin-top:4px}
   #sidebar .head .controls{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:14px}
   #sidebar .head .settings{display:flex;gap:6px}
-  #menuBtn{font-size:17px;line-height:1;padding:6px 12px}
+  #menuBtn{display:none;font-size:17px;line-height:1;padding:6px 12px}
+  /* hide flags/settings while still in the top bar (before JS moves them into the drawer) — avoids a load flash */
+  #bar #langSeg,#bar #fsDown,#bar #fsUp,#bar #theme{display:none}
   #backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:4}
   #backdrop.show{display:block}
   #toc{list-style:none;margin:0;padding:8px;overflow:auto;flex:1}
@@ -91,7 +93,6 @@
     #sidebar.open{transform:none}
     #menuBtn{display:inline-block}
   }
-  #menuBtn{display:none}
   ::selection{background:var(--sel)}
 </style>
 </head>
