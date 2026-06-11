@@ -102,8 +102,9 @@
   #main.cover #cover{display:block}
   .cv-hero{min-height:100dvh;background:#17140f;color:#efe7d6;display:flex;flex-direction:column;
    align-items:center;justify-content:center;text-align:center;padding:calc(70px + env(safe-area-inset-top)) 26px 70px;position:relative}
-  .cv-menu{position:absolute;top:calc(16px + env(safe-area-inset-top));left:16px;background:transparent;border:1px solid #4a4128;
-   color:#d8b163;border-radius:8px;font-size:17px;line-height:1;padding:7px 12px;cursor:pointer;font-family:var(--sans)}
+  .cv-menu{position:absolute;top:calc(16px + env(safe-area-inset-top));left:16px;background:rgba(23,20,15,.5);border:1px solid #4a4128;
+   color:#d8b163;border-radius:8px;font-size:17px;line-height:1;padding:7px 12px;cursor:pointer;font-family:var(--sans);z-index:2}
+  .cv-bookimg{max-height:70vh;max-width:84%;width:auto;height:auto;border-radius:4px;box-shadow:0 26px 64px rgba(0,0,0,.6);user-select:none}
   .cv-kick{font-family:var(--sans);font-size:11.5px;letter-spacing:.34em;text-transform:uppercase;color:#c9a24a;margin-bottom:24px}
   .cv-rule{width:46px;height:1px;background:#c9a24a;opacity:.7}
   .cv-title{font-family:var(--serif);font-size:clamp(46px,17vw,92px);line-height:.95;font-weight:600;margin:22px 0 0}
@@ -425,11 +426,7 @@ function showCover(){
   const w1=parts.shift(), w2=parts.join(" ");
   let html=`<section class="cv-hero">`;
   html+=`<button class="cv-menu" id="coverMenu" aria-label="Meni / Menu">☰</button>`;
-  html+=`<div class="cv-kick">${escHtml(c.kicker)}</div><div class="cv-rule"></div>`;
-  html+=`<h1 class="cv-title">${escHtml(w1)}<span class="cv-l2">${escHtml(w2)}</span></h1>`;
-  html+=`<div class="cv-auth">${escHtml(UI[lang].author)}</div>`;
-  html+=CV_MASKS;
-  html+=`<div class="cv-tag">${escHtml(c.tag)}</div>`;
+  html+=`<img class="cv-bookimg" src="cover.jpg" alt="${escHtml(UI[lang].book)} — Ljubomir Đurković" draggable="false">`;
   html+=`<div class="cv-cta">`;
   if(pos[current]!=null){ const lp=PLAYS.find(x=>x.id===current); html+=`<button class="cv-btn" id="cvCont">${escHtml(c.cont)} · ${escHtml(lp.title[lang])}</button>`; }
   html+=`<button class="cv-btn ghost" id="cvAll">${escHtml(c.all)}</button></div>`;
