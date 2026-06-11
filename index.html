@@ -210,8 +210,10 @@ function topBlock(){
 function scrollToBlock(bi,flash){
   const el=article.querySelector(`[data-bi="${bi}"]`);
   if(!el) return;
-  el.scrollIntoView({block:"start"});
-  reader.scrollTop=Math.max(0,reader.scrollTop-64);   // a little breathing room above the line
+  // Set reader.scrollTop directly. scrollIntoView() does NOT reliably scroll a
+  // nested overflow:auto container on iOS Safari, which left bookmark-jump/resume broken.
+  const target=reader.scrollTop+(el.getBoundingClientRect().top-reader.getBoundingClientRect().top)-12;
+  reader.scrollTop=Math.max(0,target);
   if(flash){ el.classList.remove("resume-here"); void el.offsetWidth; el.classList.add("resume-here"); }
 }
 
@@ -226,7 +228,9 @@ function render(opts){
   renderBM();
   requestAnimationFrame(()=>{
     if(search.value.trim().length>=2){
-      const m=article.querySelector("mark"); if(m) m.scrollIntoView({block:"center"}); return;
+      const m=article.querySelector("mark");
+      if(m){ reader.scrollTop=Math.max(0, reader.scrollTop+(m.getBoundingClientRect().top-reader.getBoundingClientRect().top)-reader.clientHeight*0.35); }
+      return;
     }
     if(opts.toBlock!=null) scrollToBlock(opts.toBlock, opts.flash);
     else if(opts.keepBlock!=null) scrollToBlock(opts.keepBlock, false);
