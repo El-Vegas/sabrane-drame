@@ -1,4 +1,4 @@
-const CACHE = "drame-v6";
+const CACHE = "drame-v7";
 const ASSETS = ["./","./index.html","./manifest.webmanifest","./cover.jpg",
   "./icon-192.png","./icon-512.png","./icon-512-maskable.png","./apple-touch-icon-180.png"];
 
