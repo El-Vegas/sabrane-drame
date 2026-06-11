@@ -2,7 +2,7 @@
 <html lang="cnr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#16140f">
 <meta name="mobile-web-app-capable" content="yes">
@@ -24,9 +24,9 @@
     --bg:#16140f; --panel:#1e1b14; --ink:#e8e1d2; --muted:#9b8f78; --accent:#d2a154; --line:#322c20; --sel:#5a4a1c;
   }
   *{box-sizing:border-box}
-  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);height:100vh;overflow:hidden;display:flex}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);height:100dvh;overflow:hidden;display:flex}
   #sidebar{width:316px;flex:0 0 316px;background:var(--panel);border-right:1px solid var(--line);
-           display:flex;flex-direction:column;height:100vh}
+           display:flex;flex-direction:column;height:100dvh}
   #sidebar .head{padding:18px 18px 14px;border-bottom:1px solid var(--line)}
   #sidebar .head h1{margin:0;font-family:var(--serif);font-size:18px;line-height:1.25}
   #sidebar .head .author{color:var(--muted);font-size:13px;margin-top:4px}
@@ -43,7 +43,7 @@
   #toc .num{font-variant-numeric:tabular-nums;color:var(--muted);font-size:13px;min-width:18px}
   #toc .t{font-family:var(--serif);font-size:15px;line-height:1.2}
   #toc .sub{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
-  #main{flex:1;display:flex;flex-direction:column;height:100vh;min-width:0}
+  #main{flex:1;display:flex;flex-direction:column;height:100dvh;min-width:0}
   #bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
   #bar .spacer{flex:1}
   #search{flex:1;min-width:0;max-width:520px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
