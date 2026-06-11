@@ -290,8 +290,10 @@ function loadAt(id, block){
 }
 function gotoBookmark(){
   if(!bm) return;
-  if(bm.play!==current) loadAt(bm.play, bm.block);
-  else scrollToBlock(bm.block, true);
+  // only a plain scroll when we're already reading that exact play; otherwise open the reader first
+  const inReader = !$("#main").classList.contains("cover");
+  if(inReader && bm.play===current) scrollToBlock(bm.block, true);
+  else loadAt(bm.play, bm.block);
   toast(UI[lang].bmGo);
 }
 
