@@ -1,5 +1,5 @@
-const CACHE = "drame-v3";
-const ASSETS = ["./","./index.html","./manifest.webmanifest",
+const CACHE = "drame-v4";
+const ASSETS = ["./","./index.html","./manifest.webmanifest","./cover.jpg",
   "./icon-192.png","./icon-512.png","./icon-512-maskable.png","./apple-touch-icon-180.png"];
 
 self.addEventListener("install", e => {
