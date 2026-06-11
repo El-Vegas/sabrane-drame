@@ -141,6 +141,22 @@
   .cv-play:hover .cv-ar{color:var(--accent)}
   .cv-foot{text-align:center;font-family:var(--sans);font-size:11.5px;letter-spacing:.04em;color:var(--muted);margin-top:60px;line-height:1.9}
   #bookTitle{cursor:pointer}
+
+  /* ===== info pages (author / bibliography) ===== */
+  #info{display:none;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+  #main.info #bmbar,#main.info #reader,#main.info #cover,#main.info #findbar{display:none}
+  #main.info #info{display:block}
+  #main.info #search,#main.info #bmBtn{display:none}
+  .info-page{max-width:42rem;margin:0 auto;padding:40px 26px 30vh;font-family:var(--serif)}
+  .info-title{font-size:1.9em;line-height:1.15;margin:0 0 26px}
+  .info-bio{font-size:var(--fs,19px);line-height:1.7;text-align:justify;margin:0}
+  .biblio{list-style:none;margin:0;padding:0}
+  .biblio li{padding:11px 2px;border-bottom:1px solid var(--line);line-height:1.5}
+  .biblio li i{font-style:italic;color:var(--ink)}
+  .cv-extra{display:flex;gap:12px;justify-content:center;margin-top:42px;flex-wrap:wrap}
+  .cv-link{font-family:var(--sans);font-size:12.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);
+   background:transparent;border:1px solid var(--line);border-radius:24px;padding:11px 20px;cursor:pointer}
+  .cv-link:hover{border-color:var(--accent)}
 </style>
 </head>
 <body>
@@ -191,6 +207,7 @@
     </div>
     <div id="findbar"></div>
     <div id="cover"></div>
+    <div id="info"></div>
     <div id="bmbar"></div>
     <div id="reader"><article id="article"><p class="hint">Učitavanje… · Loading…<br><br><span style="font-size:.85em">Ako vidite samo ovo, otvorite fajl u <b>web pregledniku</b> (Safari, Chrome) ili aplikaciji <b>Documents</b>. · If you see only this, open the file in a <b>web browser</b> or the <b>Documents</b> app.</span></p></article></div>
     <div id="toast"></div>
@@ -276,6 +293,7 @@ function render(opts){
 
 function load(id){
   $("#main").classList.remove("cover");
+  $("#main").classList.remove("info");
   current=id; LS.set("ljd_last",id);
   [...toc.children].forEach(li=>li.classList.toggle("active",+li.dataset.id===id));
   search.value="";
@@ -518,8 +536,10 @@ function showCover(){
     if(s.n[lang]) html+=`<div class="cv-sect">${escHtml(s.n[lang])}</div>`;
     s.ids.forEach(id=>{ const p=PLAYS.find(x=>x.id===id); if(p) html+=cvRow(p); });
   });
+  html+=`<div class="cv-extra"><button class="cv-link" data-info="author">${escHtml(INFO.author.title[lang])}</button><button class="cv-link" data-info="biblio">${escHtml(INFO.biblio.title[lang])}</button></div>`;
   html+=`<div class="cv-foot">${escHtml(c.foot)}<br>${escHtml(UI[lang].book)} · Ljubomir Đurković</div></section>`;
   $("#cover").innerHTML=html;
+  $("#main").classList.remove("info");
   $("#main").classList.add("cover");
   $("#cover").scrollTop=0;
   document.title=UI[lang].book+" — Ljubomir Đurković";
@@ -527,9 +547,26 @@ function showCover(){
   const cvAll=$("#cvAll"); if(cvAll) cvAll.onclick=()=>coverScrollTo($("#cvContents"));
   const cvCont=$("#cvCont"); if(cvCont) cvCont.onclick=()=>gotoBookmark();
   $("#cover").querySelectorAll(".cv-play").forEach(el=>el.onclick=()=>load(+el.dataset.id));
+  $("#cover").querySelectorAll(".cv-link").forEach(el=>el.onclick=()=>showInfo(el.dataset.info));
 }
 $("#bookTitle").title="Naslovna / Cover";
 $("#bookTitle").onclick=()=>{ showCover(); closeDrawer(); };
+
+// ===== author / bibliography info pages =====
+const INFO = {
+  author: { title:["O piscu","About the Author","Об авторе"], body:`<p class="info-bio">Ljubomir Đurković je rođen 13. novembra 1952. godine na Cetinju. Diplomirao je na Univerzitetu u Sarajevu, oblast Komparativna književnost i teatrologija. Radio je kao dramaturg u Crnogorskom narodnom pozorištu i kao direktor Kraljevskog pozorišta „Zetski dom” na Cetinju. Devedesetih godina, tokom ratova na području bivše Jugoslavije, živio je u Holandiji. Objavio je knjige pjesama Polifemov plač (1982), Poslovi i dani (1988), Ipak, nešto se pomjera (2008). Napisao je dramske tekstove Peti čin, Pisac porodične istorije, Petronije ili Metuzalemi uživaju vječito proljeće, Tobelija, Otpad, Presvlačenje, Kasandra. Klišeji, Tiresijina laž, Medeja i Kjara Zorzi, koji su objavljeni i izvođeni u pozorištima, na televiziji i radiju. Njegove drame izvedene su u pozorištima u Engleskoj, Francuskoj, Makedoniji, Bugarskoj, Sloveniji, Turskoj, Hrvatskoj, Srbiji, Bosni i Hercegovini i Crnoj Gori. Knjige drama Ljubomira Đurkovića štampane su kao posebna izdanja u Turskoj, Makedoniji, Sloveniji, Sjedinjenim američkim državama i Crnoj Gori. Knjiga poezije Vseeno, nekaj se spreminja objavljena je u Sloveniji u prijevodu Jurija Hudolina. Za dramsku trilogiju Grci dobio je Trinaestojulsku nagradu 2015. godine.</p>` },
+  biblio: { title:["Bibliografija","Bibliography","Библиография"], body:`<ul class="biblio"><li><i>Polifemov plač</i> (Književna omladina Crne Gore, Titograd, 1982)</li><li><i>Tri drame</i> (Književna opština Cetinje, 1985)</li><li><i>Poslovi i dani</i> (Udruženje književnika Crne Gore, Titograd, 1988)</li><li><i>Pisac porodične istorije</i> (Cidram, Podgorica, 1999)</li><li><i>Tobelija</i> (Crnogorsko narodno pozorište, Podgorica; Međunarodni multimedijalni festival Ex Ponto, Ljubljana, 2000)</li><li><i>Драми</i> (prevod na makedonski Zagorka Pop-Antonska Andovska, Fakultet za audiovizuelne umjetnosti, Skoplje, 2011)</li><li><i>Otpad / Refuse</i> (prevod na engleski Paula Gordon, Crnogorsko narodno pozorište, Podgorica, 2003)</li><li><i>Ipak, nešto se pomjera</i> (CDNK, Podgorica 2009)</li><li><i>Tiresijina laž</i> (Kraljevsko pozorište Zetski dom, Cetinje; Festival MESS, Sarajevo; Festival Teuta – Novi antički teatar, Kotor, 2010)</li><li><i>Kasandra. Klišeji / Cassandra. Clichés</i> (prevod na engleski Jelena Stanovnik, Crnogorsko narodno pozorište, 2011)</li><li><i>Kassandra</i> (prevod na turski Bilge Emin, Mitos Boyut Yayinlari, Turska, 2011)</li><li><i>Vseeno, nekaj se spreminja</i> (prevod na slovenački Jurij Hudolin, KUD Apokalipsa, Slovenija, 2012)</li><li><i>Grci</i> (Žuta kornjača, Podgorica, 2015)</li><li><i>Porodična trilogija</i> (OKF, Cetinje; Zavod za udžbenike i nastavna sredstva, Podgorica; Nacionalna biblioteka Crne Gore „Đurđe Crnojević“, Cetinje; Fakultet za crnogorski jezik i književnost, Cetinje, 2016)</li><li><i>Grki</i> (prevod na slovenački Jurij Hudolin, KUD Apokalipsa, Ljubljana; Fokalizator, Podgorica, 2019)</li><li><i>Sabrana djela: drame, poezija, proza</i> (Žuta kornjača, Podgorica, 2024)</li></ul>` }
+};
+function showInfo(key){
+  const c=INFO[key];
+  $("#main").classList.remove("cover");
+  $("#main").classList.add("info");
+  search.value="";
+  $("#info").innerHTML=`<article class="info-page"><h1 class="info-title">${escHtml(c.title[lang])}</h1>${c.body}</article>`;
+  $("#info").scrollTop=0;
+  document.title=c.title[lang]+" — Ljubomir Đurković";
+  closeDrawer();
+}
 
 // init — apply language chrome, then resume the last play at the last line
 buildTOC();
