@@ -47,9 +47,9 @@
   #toc .t{font-family:var(--serif);font-size:15px;line-height:1.2}
   #toc .sub{display:block;color:var(--muted);font-size:11.5px;margin-top:2px}
   #main{flex:1;display:flex;flex-direction:column;height:100dvh;min-width:0}
-  #bar{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  #bar{display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:1px solid var(--line);background:var(--panel)}
   #bar .spacer{flex:1}
-  #search{flex:1;min-width:0;max-width:520px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
+  #search{flex:1 1 50px;min-width:0;max-width:520px;padding:8px 11px;border:1px solid var(--line);border-radius:8px;background:var(--bg);
           color:var(--ink);font-size:14px;font-family:var(--sans)}
   .seg{display:inline-flex;gap:7px}
   .seg button{border:1px solid var(--line);background:var(--bg);border-radius:5px;padding:2px;cursor:pointer;
@@ -60,6 +60,12 @@
   .btn{border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:8px;padding:6px 10px;
        cursor:pointer;font-size:13px;font-family:var(--sans)}
   .btn:hover{border-color:var(--accent)}
+  #findbar{display:none;align-items:center;gap:10px;padding:7px 16px;border-bottom:1px solid var(--line);background:var(--panel);font-family:var(--sans)}
+  #main.cover #findbar{display:none!important}
+  #findInfo{font-size:13px;color:var(--ink);font-variant-numeric:tabular-nums}
+  #findbar .findlbl{font-size:12.5px;color:var(--muted)}
+  #findbar .sp{flex:1}
+  .btn.nav{padding:5px 11px;font-size:16px;line-height:1}
   #bmBtn.active{border-color:var(--accent);color:var(--accent);background:rgba(138,90,43,.10)}
   #reader{overflow:auto;flex:1;scroll-behavior:smooth}
   article{max-width:42rem;margin:0 auto;padding:48px 28px 30vh;font-family:var(--serif);
@@ -74,6 +80,7 @@
               text-transform:uppercase;color:var(--accent);margin-right:.5em}
   article em{color:var(--muted)}
   mark{background:var(--sel);color:inherit;border-radius:2px}
+  mark.active{background:var(--accent);color:#fff}
   .hint{color:var(--muted);text-align:center;margin-top:30vh;font-family:var(--sans)}
   #bmbar{display:none;align-items:center;gap:8px;padding:7px 16px;border-bottom:1px solid var(--line);
          background:var(--panel);overflow-x:auto;white-space:nowrap}
@@ -176,12 +183,13 @@
           </svg>
         </button>
       </span>
-      <input id="search" type="search" autocomplete="off" aria-label="Pretraga u drami / Search in play">
+      <input id="search" type="search" autocomplete="off" aria-label="Pretraga / Search">
       <button class="btn" id="bmBtn" title="Save / go to bookmark" aria-label="Markica / Bookmark">🔖</button>
       <button class="btn" id="fsDown" title="Manje slovo / Smaller text" aria-label="Manje slovo / Smaller text">A−</button>
       <button class="btn" id="fsUp" title="Veće slovo / Larger text" aria-label="Veće slovo / Larger text">A+</button>
       <button class="btn" id="theme" title="Tema / Theme" aria-label="Tema / Theme">◐</button>
     </div>
+    <div id="findbar"></div>
     <div id="cover"></div>
     <div id="bmbar"></div>
     <div id="reader"><article id="article"><p class="hint">Učitavanje… · Loading…<br><br><span style="font-size:.85em">Ako vidite samo ovo, otvorite fajl u <b>web pregledniku</b> (Safari, Chrome) ili aplikaciji <b>Documents</b>. · If you see only this, open the file in a <b>web browser</b> or the <b>Documents</b> app.</span></p></article></div>
@@ -258,11 +266,7 @@ function render(opts){
   applySearch();
   renderBM();
   requestAnimationFrame(()=>{
-    if(search.value.trim().length>=2){
-      const m=article.querySelector("mark");
-      if(m){ reader.scrollTop=Math.max(0, reader.scrollTop+(m.getBoundingClientRect().top-reader.getBoundingClientRect().top)-reader.clientHeight*0.35); }
-      return;
-    }
+    if(search.value.trim().length>=2){ highlightActive(true); return; }
     if(opts.toBlock!=null) scrollToBlock(opts.toBlock, opts.flash);
     else if(opts.keepBlock!=null) scrollToBlock(opts.keepBlock, false);
     else reader.scrollTop=0;
@@ -355,8 +359,75 @@ function applySearch(){
   const rx=new RegExp("("+q.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+")","gi");
   walk(article,rx);
 }
-let st;
-search.addEventListener("input",()=>{clearTimeout(st);st=setTimeout(()=>render({keepBlock:topBlock()}),180);});
+// ---- whole-book find: total count + prev/next across all plays ----
+let matches=[], mIdx=0, st;
+function buildMatches(q){
+  matches=[];
+  if(q.length<2) return;
+  const needle=q.toLowerCase();
+  for(const p of PLAYS){
+    const bl=p.blocks;
+    for(let bi=0;bi<bl.length;bi++){
+      const b=bl[bi];
+      const text=((b.w?b.w[lang]+" ":"")+(b.s[lang]||"")).toLowerCase();
+      let from=0,idx;
+      while((idx=text.indexOf(needle,from))!==-1){ matches.push({play:p.id}); from=idx+needle.length; }
+    }
+  }
+}
+const FINDWORD=["rezultata","results","результатов"], NOHITS=["nema rezultata","no results","нет результатов"];
+function updateFindUI(){
+  const finding=search.value.trim().length>=2;
+  const bar=$("#findbar");
+  $("#main").classList.toggle("finding", finding);
+  if(!finding){ bar.style.display="none"; bar.innerHTML=""; return; }
+  bar.style.display="flex";
+  const total=matches.length;
+  bar.innerHTML=`<button class="btn nav" id="findPrev" aria-label="Prethodni / Previous" title="Prethodni / Previous">‹</button>`
+    +`<span id="findInfo">${total?(mIdx+1)+" / "+total:"0 / 0"}</span>`
+    +`<button class="btn nav" id="findNext" aria-label="Sljedeći / Next" title="Sljedeći / Next">›</button>`
+    +`<span class="sp"></span>`
+    +`<span class="findlbl">${total?(total+" "+FINDWORD[lang]):NOHITS[lang]}</span>`;
+  $("#findNext").onclick=nextMatch;
+  $("#findPrev").onclick=prevMatch;
+}
+function highlightActive(scroll){
+  const els=article.querySelectorAll("mark");
+  els.forEach(el=>el.classList.remove("active"));
+  if(!matches.length) return;
+  const start=matches.findIndex(m=>m.play===current);
+  let rel=mIdx-start;
+  if(rel<0||rel>=els.length) rel=0;
+  const el=els[rel];
+  if(el){ el.classList.add("active"); if(scroll){ reader.scrollTop=Math.max(0, reader.scrollTop+(el.getBoundingClientRect().top-reader.getBoundingClientRect().top)-reader.clientHeight*0.4); } }
+}
+function switchPlayForFind(id){
+  $("#main").classList.remove("cover");
+  current=id; LS.set("ljd_last",id);
+  [...toc.children].forEach(li=>li.classList.toggle("active",+li.dataset.id===id));
+  render({}); // search active -> rAF highlightActive(true)
+}
+function gotoMatch(i){
+  if(!matches.length) return;
+  mIdx=((i%matches.length)+matches.length)%matches.length;
+  const m=matches[mIdx];
+  if(m.play!==current) switchPlayForFind(m.play);
+  else highlightActive(true);
+  updateFindUI();
+}
+function nextMatch(){ gotoMatch(mIdx+1); }
+function prevMatch(){ gotoMatch(mIdx-1); }
+function runFind(){
+  const q=search.value.trim();
+  buildMatches(q);
+  if(q.length<2 || !matches.length){ mIdx=0; updateFindUI(); render({keepBlock:topBlock()}); return; }
+  const fic=matches.findIndex(m=>m.play===current);
+  if(fic>=0){ mIdx=fic; render({}); }                     // current play has hits — highlight here
+  else { mIdx=0; switchPlayForFind(matches[0].play); }    // otherwise jump to the first hit
+  updateFindUI();
+}
+search.addEventListener("input",()=>{clearTimeout(st);st=setTimeout(runFind,180);});
+search.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); e.shiftKey?prevMatch():nextMatch(); } });
 function walk(node,rx){
   for(const c of [...node.childNodes]){
     if(c.nodeType===3){
