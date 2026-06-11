@@ -434,7 +434,7 @@ function showCover(){
   html+=`<div class="cv-overlay"><div class="cv-cta">`;
   if(bm){ const bp=PLAYS.find(x=>x.id===bm.play); html+=`<button class="cv-btn" id="cvCont">${escHtml(c.cont)} · ${escHtml(bp.title[lang])}</button>`; }
   html+=`<button class="cv-btn ghost" id="cvAll">${escHtml(c.all)}</button></div>`;
-  html+=`<div class="cv-scroll" id="cvScroll">${escHtml(c.scroll)}</div></div></section>`;
+  html+=`</div></section>`;
   html+=`<section class="cv-contents" id="cvContents"><div class="cv-h">${escHtml(c.ch)}</div><div class="cv-sub">${escHtml(c.csub)}</div>`;
   SECTIONS.forEach(s=>{
     if(s.n[lang]) html+=`<div class="cv-sect">${escHtml(s.n[lang])}</div>`;
@@ -447,7 +447,6 @@ function showCover(){
   document.title=UI[lang].book+" — Ljubomir Đurković";
   $("#coverMenu").onclick=()=>toggleDrawer(true);
   const cvAll=$("#cvAll"); if(cvAll) cvAll.onclick=()=>coverScrollTo($("#cvContents"));
-  const cvScroll=$("#cvScroll"); if(cvScroll) cvScroll.onclick=()=>coverScrollTo($("#cvContents"));
   const cvCont=$("#cvCont"); if(cvCont) cvCont.onclick=()=>gotoBookmark();
   $("#cover").querySelectorAll(".cv-play").forEach(el=>el.onclick=()=>load(+el.dataset.id));
 }
