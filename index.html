@@ -372,6 +372,14 @@ search.placeholder=UI[lang].search;
 document.documentElement.lang = ["cnr","en","ru"][lang];
 load(current);
 </script>
-<script>if("serviceWorker"in navigator){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){})})}</script>
+<script>if("serviceWorker"in navigator){
+  var __reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",function(){
+    if(__reloaded)return; __reloaded=true; location.reload();
+  });
+  addEventListener("load",function(){
+    navigator.serviceWorker.register("sw.js").then(function(reg){reg.update();}).catch(function(){});
+  });
+}</script>
 </body>
 </html>
