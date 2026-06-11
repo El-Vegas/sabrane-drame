@@ -318,11 +318,15 @@ reader.addEventListener("scroll",()=>{
   scrT=setTimeout(()=>{ pos[current]=topBlock(); LS.set("ljd_pos",JSON.stringify(pos)); },300);
 });
 
-// ONE global bookmark. First tap saves your spot (replacing any old one); later taps
-// jump back to it — even across plays. Remove via the chip's ×.
+// ONE global bookmark. Tapping the button ALWAYS replaces it with the current spot
+// (deletes any old bookmark, sets a new one here). Jump to it via the cover's
+// "Continue reading" or the bookmark chip. Remove with the chip's ×.
 function onBookmark(){
-  if(bm){ gotoBookmark(); }
-  else { const top=topBlock(); bm={play:current, block:top}; saveBm(); render({keepBlock:top}); toast(UI[lang].bmAdd); }
+  const top=topBlock();
+  bm={play:current, block:top};
+  saveBm();
+  render({keepBlock:top});
+  toast(UI[lang].bmAdd);
 }
 function renderBM(){
   const bar=$("#bmbar");
