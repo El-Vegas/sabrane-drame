@@ -100,11 +100,12 @@
   #cover{display:none;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
   #main.cover #bar,#main.cover #bmbar,#main.cover #reader{display:none}
   #main.cover #cover{display:block}
-  .cv-hero{min-height:100dvh;background:#17140f;color:#efe7d6;display:flex;flex-direction:column;
-   align-items:center;justify-content:center;text-align:center;padding:calc(70px + env(safe-area-inset-top)) 26px 70px;position:relative}
-  .cv-menu{position:absolute;top:calc(16px + env(safe-area-inset-top));left:16px;background:rgba(23,20,15,.5);border:1px solid #4a4128;
-   color:#d8b163;border-radius:8px;font-size:17px;line-height:1;padding:7px 12px;cursor:pointer;font-family:var(--sans);z-index:2}
-  .cv-bookimg{max-height:70vh;max-width:84%;width:auto;height:auto;border-radius:4px;box-shadow:0 26px 64px rgba(0,0,0,.6);user-select:none}
+  .cv-hero{height:100dvh;background:var(--bg);position:relative;overflow:hidden}
+  .cv-menu{position:absolute;top:calc(16px + env(safe-area-inset-top));left:16px;background:rgba(23,20,15,.5);border:1px solid rgba(216,177,99,.5);
+   color:#f1e3c4;border-radius:8px;font-size:17px;line-height:1;padding:7px 12px;cursor:pointer;font-family:var(--sans);z-index:2;backdrop-filter:blur(3px)}
+  .cv-bookimg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;user-select:none;display:block}
+  .cv-overlay{position:absolute;left:0;right:0;bottom:0;z-index:2;display:flex;flex-direction:column;align-items:center;gap:12px;
+   padding:46px 26px calc(20px + env(safe-area-inset-bottom));background:linear-gradient(to top,rgba(10,8,5,.72),rgba(10,8,5,0))}
   .cv-kick{font-family:var(--sans);font-size:11.5px;letter-spacing:.34em;text-transform:uppercase;color:#c9a24a;margin-bottom:24px}
   .cv-rule{width:46px;height:1px;background:#c9a24a;opacity:.7}
   .cv-title{font-family:var(--serif);font-size:clamp(46px,17vw,92px);line-height:.95;font-weight:600;margin:22px 0 0}
@@ -112,12 +113,11 @@
   .cv-auth{font-family:var(--sans);font-size:14px;letter-spacing:.22em;text-transform:uppercase;color:#bcae93;margin-top:14px}
   .cv-masks{width:56px;height:56px;margin-top:30px;opacity:.92}
   .cv-tag{font-family:var(--serif);font-style:italic;color:#bcae93;font-size:17px;margin-top:26px;max-width:24rem;line-height:1.5}
-  .cv-cta{display:flex;flex-direction:column;gap:12px;margin-top:34px;width:min(330px,100%)}
+  .cv-cta{display:flex;flex-direction:column;gap:12px;margin:0;width:min(330px,100%)}
   .cv-btn{font-family:var(--sans);font-size:13px;letter-spacing:.05em;padding:13px 22px;border-radius:30px;border:1px solid #c9a24a;
    color:#17140f;background:#d8b163;text-transform:uppercase;cursor:pointer;text-align:center}
-  .cv-btn.ghost{background:transparent;color:#d8b163}
-  .cv-scroll{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;font-family:var(--sans);
-   font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#8c7f63;cursor:pointer}
+  .cv-btn.ghost{background:rgba(23,20,15,.35);color:#f1e3c4;backdrop-filter:blur(2px)}
+  .cv-scroll{font-family:var(--sans);font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#e6d6ad;cursor:pointer;text-shadow:0 1px 4px rgba(0,0,0,.6)}
   .cv-contents{max-width:46rem;margin:0 auto;padding:64px 24px 120px}
   .cv-h{font-family:var(--sans);text-align:center;font-size:12px;letter-spacing:.32em;text-transform:uppercase;color:var(--accent);margin-bottom:6px}
   .cv-sub{text-align:center;font-family:var(--serif);font-style:italic;color:var(--muted);margin-bottom:34px}
@@ -427,10 +427,10 @@ function showCover(){
   let html=`<section class="cv-hero">`;
   html+=`<button class="cv-menu" id="coverMenu" aria-label="Meni / Menu">☰</button>`;
   html+=`<img class="cv-bookimg" src="cover.jpg" alt="${escHtml(UI[lang].book)} — Ljubomir Đurković" draggable="false">`;
-  html+=`<div class="cv-cta">`;
+  html+=`<div class="cv-overlay"><div class="cv-cta">`;
   if(pos[current]!=null){ const lp=PLAYS.find(x=>x.id===current); html+=`<button class="cv-btn" id="cvCont">${escHtml(c.cont)} · ${escHtml(lp.title[lang])}</button>`; }
   html+=`<button class="cv-btn ghost" id="cvAll">${escHtml(c.all)}</button></div>`;
-  html+=`<div class="cv-scroll" id="cvScroll">${escHtml(c.scroll)}</div></section>`;
+  html+=`<div class="cv-scroll" id="cvScroll">${escHtml(c.scroll)}</div></div></section>`;
   html+=`<section class="cv-contents" id="cvContents"><div class="cv-h">${escHtml(c.ch)}</div><div class="cv-sub">${escHtml(c.csub)}</div>`;
   SECTIONS.forEach(s=>{
     if(s.n[lang]) html+=`<div class="cv-sect">${escHtml(s.n[lang])}</div>`;
