@@ -615,13 +615,12 @@ document.documentElement.lang = ["cnr","en","ru"][lang];
 showCover();
 </script>
 <script>
-// No service worker: always load the live version. Also clean up any old SW/caches
-// left from earlier versions so nothing stale is ever served again.
+// Register the service worker for offline use + Add to Home Screen.
+// (Network-first for the page, so you always get the latest version when online.)
 if("serviceWorker" in navigator){
-  navigator.serviceWorker.getRegistrations().then(function(rs){ rs.forEach(function(r){ r.unregister(); }); }).catch(function(){});
-}
-if(window.caches && caches.keys){
-  caches.keys().then(function(ks){ ks.forEach(function(k){ caches.delete(k); }); }).catch(function(){});
+  window.addEventListener("load", function(){
+    navigator.serviceWorker.register("sw.js").catch(function(){});
+  });
 }
 </script>
 </body>
