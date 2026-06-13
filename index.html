@@ -82,7 +82,7 @@
   #findbar .sp{flex:1}
   .btn.nav{padding:5px 11px;font-size:16px;line-height:1}
   #bmBtn.active{border-color:var(--accent);color:var(--accent);background:rgba(138,90,43,.10)}
-  #reader{overflow:auto;flex:1;scroll-behavior:smooth}
+  #reader{overflow:auto;flex:1;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
   article{max-width:42rem;margin:0 auto;padding:48px 28px 30vh;font-family:var(--serif);
            font-size:var(--fs,19px);line-height:1.62;color:var(--ink)}
   article .title{font-size:1.9em;line-height:1.15;margin:0 0 6px}
@@ -119,10 +119,16 @@
     #sidebar.open{transform:none}
     #menuBtn{display:inline-block}
   }
+  #toTop{position:fixed;right:18px;bottom:calc(20px + env(safe-area-inset-bottom));width:46px;height:46px;border-radius:50%;
+   display:flex;align-items:center;justify-content:center;border:1px solid var(--line);background:var(--panel);color:var(--accent);
+   font-size:20px;line-height:1;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.18);opacity:0;transform:translateY(10px) scale(.96);
+   pointer-events:none;transition:opacity .28s ease,transform .28s ease;z-index:8}
+  #toTop.show{opacity:.96;transform:none;pointer-events:auto}
+  #toTop:hover{border-color:var(--accent);color:#fff;background:var(--accent)}
   ::selection{background:var(--sel)}
 
   /* ===== cover / landing ===== */
-  #cover{display:none;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+  #cover{display:none;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
   #main.cover #bar,#main.cover #bmbar,#main.cover #reader{display:none}
   #main.cover #cover{display:block}
   .cv-hero{height:100dvh;background:var(--bg);position:relative;overflow:hidden}
@@ -160,7 +166,7 @@
   #bookTitle{cursor:pointer}
 
   /* ===== info pages (author / bibliography) ===== */
-  #info{display:none;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch}
+  #info{display:none;overflow-y:auto;flex:1;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
   #main.info #bmbar,#main.info #reader,#main.info #cover,#main.info #findbar{display:none}
   #main.info #info{display:block}
   #main.info #search,#main.info #bmBtn{display:none}
@@ -228,6 +234,7 @@
     <div id="bmbar"></div>
     <div id="reader"><article id="article"><p class="hint">Učitavanje… · Loading…<br><br><span style="font-size:.85em">Ako vidite samo ovo, otvorite fajl u <b>web pregledniku</b> (Safari, Chrome) ili aplikaciji <b>Documents</b>. · If you see only this, open the file in a <b>web browser</b> or the <b>Documents</b> app.</span></p></article></div>
     <div id="toast"></div>
+    <button id="toTop" aria-label="Na vrh / Back to top" title="Na vrh / Back to top">↑</button>
   </div>
 
 <script>
@@ -307,6 +314,7 @@ function render(opts){
     else if(opts.keepBlock!=null) scrollToBlock(opts.keepBlock, false);
     else reader.scrollTop=0;
   });
+  requestAnimationFrame(updateToTop);
   document.title = p.title[lang] + " — Ljubomir Đurković";
 }
 
@@ -561,7 +569,7 @@ function showCover(){
   $("#cover").innerHTML=html;
   $("#main").classList.remove("info");
   $("#main").classList.add("cover");
-  $("#cover").scrollTop=0;
+  $("#cover").scrollTop=0; requestAnimationFrame(updateToTop);
   document.title=UI[lang].book+" — Ljubomir Đurković";
   $("#coverMenu").onclick=()=>toggleDrawer(true);
   const cvAll=$("#cvAll"); if(cvAll) cvAll.onclick=()=>coverScrollTo($("#cvContents"));
@@ -585,10 +593,17 @@ function showInfo(key){
   $("#main").classList.add("info");
   search.value="";
   $("#info").innerHTML=`<article class="info-page"><h1 class="info-title">${escHtml(c.title[lang])}</h1>${c.body[lang]}</article>`;
-  $("#info").scrollTop=0;
+  $("#info").scrollTop=0; requestAnimationFrame(updateToTop);
   document.title=c.title[lang]+" — Ljubomir Đurković";
   closeDrawer();
 }
+
+// floating "back to top"
+const toTop=$("#toTop");
+function activeScroller(){ const m=$("#main"); return m.classList.contains("cover")?$("#cover"):(m.classList.contains("info")?$("#info"):reader); }
+function updateToTop(){ toTop.classList.toggle("show", activeScroller().scrollTop>320); }
+[reader,$("#cover"),$("#info")].forEach(el=>el.addEventListener("scroll",updateToTop,{passive:true}));
+toTop.onclick=()=>{ try{ activeScroller().scrollTo({top:0,behavior:"smooth"}); }catch(e){ activeScroller().scrollTop=0; } };
 
 // init — apply language chrome, then resume the last play at the last line
 buildTOC();
